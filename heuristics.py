@@ -1,12 +1,22 @@
 import numpy as np
+import heapq
 import math
 
-MAX_NUM = int(1e12)
+MAX_NUM = int(1e12) # maximum that a_i can be
+trials = 50 # number of trials 
+numbers = 100 # number of elements in A
 # MAX_NUM = 10
 
 debug = False
 
-def random_algo(A, num_iterations = 25000):
+def kk(A):
+    h = [-i for i in A]  
+    heapq.heapify(h)
+    while len(h) > 1:
+        heapq.heappush(h, -((-heapq.heappop(h))  - (-heapq.heappop(h))) )
+    return -h[0] 
+
+def random_algo(A, num_iterations = 25000, partition = False):
     n = len(A)
 
     partitions = np.random.choice([-1,1], size=(num_iterations, n)) # each row is a partition
@@ -28,16 +38,26 @@ def partition(A):
         print(f'A: {A}, indices: {indices}, A_prime: {A_prime}')
     return A_prime
 
-def run_experiments(algo, numbers = 5, trials=50, num_iterations=25000, prepartition = False):
+# return a random neighbor of a given set A or partition P
+def random_neighbor(A, partition = False):
+    if partition:
+        raise NotImplementedError
+    else:
+        raise NotImplementedError
+
+# given an algorithm, run that algorithm on the list of A_s given (A_list)
+def run_experiments(algo, A_list, num_iterations=25000, prepartition = False):
     results = []
-    for trial in range(trials):
-        A = np.random.randint(0, MAX_NUM, size=numbers)
+    for A in A_list:
+        n = len(A)
         if prepartition:
-            P = partition(A)
-        else:
-            result = algo(A, num_iterations=num_iterations)
-            results.append(result)
+            A = partition(A)
+        
+        result = algo(A, num_iterations=num_iterations, partition = prepartition)
+        results.append(result)
+        
     return np.array(results)
 
+A_list = np.random.randint(0, MAX_NUM, size=(trials, numbers))
 
-run_experiments(random_algo)
+print(run_experiments(random_algo, A_list))
