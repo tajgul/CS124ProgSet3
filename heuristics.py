@@ -19,13 +19,19 @@ def kk(A):
 def random_algo(A, num_iterations = 25000, partition = False):
     n = len(A)
 
-    partitions = np.random.choice([-1,1], size=(num_iterations, n)) # each row is a partition
+    minimum_r = 1e15
+    for iter in range(num_iterations):
+        if partition:
+            # initialize a random partition
+            S = np.random.randint(0, n, size=n)
+            A_prime = np.array([A[np.where(S == i)[0]].sum() for i in range(n)])
+            minimum_r = min(minimum_r, kk(A_prime))
+        else:
+            # initialize a random assignment
+            S = np.random.choice([-1, 1], size=n)
+            minimum_r = min(minimum_r, np.abs(np.sum(S*A)))
 
-    values = partitions * A
-
-    residues = np.abs(values.sum(axis=1)) # take row sums, and absolute values
-
-    return residues.min()
+    return minimum_r
 
 def hill_climb_algo(A, num_iterations=25000, partition = False):
     n = len(A)
@@ -50,19 +56,14 @@ def hill_climb_algo(A, num_iterations=25000, partition = False):
             r = kk(A_prime)
         else:
             r = np.abs(np.sum(A*S_prime))
+
+        # if it is a better point, we move
         if r < minimum_r:
             minimum_r = r
             S = S_prime
     
+    # we could also return S if we wanted to
     return minimum_r
-
-def partition(A):
-    n = len(A)
-    indices = np.random.randint(0, n, size=n)
-    A_prime = np.array([A[np.where(indices == i)[0]].sum() for i in range(n)])
-    if debug:
-        print(f'A: {A}, indices: {indices}, A_prime: {A_prime}')
-    return A_prime
 
 # return a random neighbor of a given set A or partition P
 def random_neighbor(S, partition = False):
@@ -71,7 +72,7 @@ def random_neighbor(S, partition = False):
         # choose random i, j such that S[i] != j
         # set S[i] = j
         i, j = np.random.choice(list(range(0, n)), size=2, replace=False)
-        while i != S[j]:
+        while j != S[i]:
             i, j = np.random.choice(list(range(0, n)), size=2, replace=False)
         S[i]=j
         return S
@@ -88,11 +89,7 @@ def random_neighbor(S, partition = False):
 # given an algorithm, run that algorithm on the list of A_s given (A_list)
 def run_experiments(algo, A_list, num_iterations=25000, prepartition = False):
     results = []
-    for A in A_list:
-        n = len(A)
-        if prepartition:
-            A = partition(A)
-        
+    for A in A_list:        
         result = algo(A, num_iterations=num_iterations, partition = prepartition)
         results.append(result)
         
@@ -100,4 +97,7 @@ def run_experiments(algo, A_list, num_iterations=25000, prepartition = False):
 
 A_list = np.random.randint(0, MAX_NUM, size=(trials, numbers))
 
+print(run_experiments(random_algo, A_list))
 print(run_experiments(hill_climb_algo, A_list))
+# print(run_experiments(random_algo, A_list, prepartition=True))
+# print(run_experiments(hill_climb_algo, A_list, prepartition=True))
