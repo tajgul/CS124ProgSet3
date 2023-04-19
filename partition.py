@@ -73,6 +73,7 @@ def master(flag, code, input):
             end = time.time()
             avg_time += (end - start)
         print(avg_time / num_iterations)
+        print(avg_time)
         # we could also return S if we wanted to
         return minimum_r
 

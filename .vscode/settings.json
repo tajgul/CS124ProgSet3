@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "queue": "cpp",
+        "vector": "cpp",
+        "random": "cpp",
+        "chrono": "cpp"
+    }
+}
